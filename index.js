@@ -26,6 +26,7 @@ mongoose
 const allowedOrigins = [
 
   "http://localhost:5173",
+  "https://sm-tours-frontend.vercel.app"
 ];
 app.use(
   cors({
