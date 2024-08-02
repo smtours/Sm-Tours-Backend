@@ -7,7 +7,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 
-
+//frontendurl
 const resetpass=async(req,res)=>{
     try {
         const {email}=req.body;
