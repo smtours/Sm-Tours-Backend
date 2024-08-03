@@ -20,7 +20,8 @@ const sendmail = async (req, res) => {
             from:email,
             to:"uzairsmtoursntravels@gmail.com",
             subject: subject,
-            text:message
+            text:message,
+            replyTo:email
 
         })
         res.status(201).json({message:"Email has been send"})
