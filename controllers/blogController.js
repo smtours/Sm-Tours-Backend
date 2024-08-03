@@ -49,16 +49,31 @@ const getAllblogs = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
-const updateblog=async(req,res)=>{
+const updateblog = async (req, res) => {
   const { id } = req.params;
   const { title, description, picture } = req.body;
 
   try {
-    const updatedBlog = await Blog.findByIdAndUpdate(id, { title, description, picture }, { new: true });
+    // Find the existing blog
+    const existingBlog = await Blog.findById(id);
+
+    if (!existingBlog) {
+      return res.status(404).json({ error: 'Blog not found' });
+    }
+
+    // Update only the fields that are provided in the request body
+    const updatedData = {
+      title: title || existingBlog.title,
+      description: description || existingBlog.description,
+      picture: picture || existingBlog.picture,
+    };
+
+    const updatedBlog = await Blog.findByIdAndUpdate(id, updatedData, { new: true });
     res.status(200).json(updatedBlog);
   } catch (error) {
     res.status(500).json({ error: 'Failed to update blog' });
   }
-}
+};
+
 
 export { addblog, deleteblog, getAllblogs, getsingleblog,updateblog };
