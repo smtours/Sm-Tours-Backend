@@ -49,5 +49,16 @@ const getAllblogs = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+const updateblog=async(req,res)=>{
+  const { id } = req.params;
+  const { title, description, picture } = req.body;
 
-export { addblog, deleteblog, getAllblogs, getsingleblog };
+  try {
+    const updatedBlog = await Blog.findByIdAndUpdate(id, { title, description, picture }, { new: true });
+    res.status(200).json(updatedBlog);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update blog' });
+  }
+}
+
+export { addblog, deleteblog, getAllblogs, getsingleblog,updateblog };
