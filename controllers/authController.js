@@ -24,10 +24,10 @@ const registerUser = async (req, res) => {
 
     // Check if the email is already registered
     const existingUser = await User.findOne({ email });
-    if (existingUser && existingUser.isActive===true) {
+    if (existingUser.isActive) {
       return res.status(400).json({ message: "Email is already registered" });
-    }
-    if (existingUser && existingUser.isActive === false) {
+    }else{
+    const emailtoken = jwt.sign({ email }, process.env.SECRET_KEY, { expiresIn: '10m' });
       const verificationUrl = `${process.env.FRONTENDURL}/verify/${emailtoken}`;
       await transporter.sendMail({
         from: "uzairsmtoursntravels@gmail.com",
@@ -534,8 +534,9 @@ const registerUser = async (req, res) => {
         </html>` 
       });
     
-      return;
+      
     }
+   
     
 
     // Hash the password
