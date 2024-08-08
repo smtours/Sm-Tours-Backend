@@ -25,41 +25,37 @@ const registerUser = async (req, res) => {
     // Check if the user already exists
     let user = await User.findOne({ email });
 
-      if (user && user.isActive) {
-        return res.status(400).json({ message: "Email is already registered" });
-      } 
-      
-     let verificationUrl
-      if(user && !user.isActive){
-    const emailtoken = jwt.sign({ email }, process.env.SECRET_KEY, { expiresIn: '10m' });
-     verificationUrl = `${process.env.FRONTENDURL}/verify/${emailtoken}`;    
-      }else{
-        const salt = await bcryptjs.genSalt(10);
-    const hashedPassword = await bcryptjs.hash(password, salt);
-    const emailtoken = jwt.sign({ email }, process.env.SECRET_KEY, { expiresIn: '10m' });
+    if (user && user.isActive) {
+      return res.status(400).json({ message: "Email is already registered" });
+    }
 
-    const newUser = new User({
-      username,
-      email,
-      password: hashedPassword,
-      photo,
-      isActive: false,
-      emailtoken
-    });
-     user= await newUser.save();
+    let verificationUrl;
+    let emailtoken;
+
+    if (user && !user.isActive) {
+      // User exists but is not active
+      emailtoken = jwt.sign({ email }, process.env.SECRET_KEY, { expiresIn: '10m' });
+      verificationUrl = `${process.env.FRONTENDURL}/verify/${emailtoken}`;
+    } else {
+      // New user registration
+      const salt = await bcryptjs.genSalt(10);
+      const hashedPassword = await bcryptjs.hash(password, salt);
+      emailtoken = jwt.sign({ email }, process.env.SECRET_KEY, { expiresIn: '10m' });
+
+      const newUser = new User({
+        username,
+        email,
+        password: hashedPassword,
+        photo,
+        isActive: false,
+        emailtoken
+      });
+
+      user = await newUser.save();
+      verificationUrl = `${process.env.FRONTENDURL}/verify/${emailtoken}`;
+    }
 
     // Send verification email
-     verificationUrl = `${process.env.FRONTENDURL}/verify/${emailtoken}`;
-      }
-    
-
-    // Hash the password
-    
-
-    // Create a new user with inactive status and verification token
-  
-
-  
     await transporter.sendMail({
       from: "uzairsmtoursntravels@gmail.com",
       to: email,
@@ -359,6 +355,10 @@ const registerUser = async (req, res) => {
             color: #51545E;
           }
           
+          p.sub {
+            color: #6B6E76;
+          }
+          
           .email-wrapper {
             width: 100%;
             margin: 0;
@@ -404,6 +404,7 @@ const registerUser = async (req, res) => {
             -premailer-width: 100%;
             -premailer-cellpadding: 0;
             -premailer-cellspacing: 0;
+            background-color: #FFFFFF;
           }
           
           .email-body_inner {
@@ -427,7 +428,7 @@ const registerUser = async (req, res) => {
           }
           
           .email-footer p {
-            color: #A8AAAF;
+            color: #6B6E76;
           }
           
           .body-action {
@@ -447,7 +448,7 @@ const registerUser = async (req, res) => {
           }
           
           .content-cell {
-            padding: 45px;
+            padding: 35px;
           }
           /*Media Queries ------------------------------ */
           
@@ -503,39 +504,54 @@ const registerUser = async (req, res) => {
         <![endif]-->
         </head>
         <body>
-          <span class="preheader">Use this link to reset your password. The link is only valid for 24 hours.</span>
+          <span class="preheader">Please verify your email address to activate your account</span>
           <table class="email-wrapper" width="100%" cellpadding="0" cellspacing="0" role="presentation">
-          
+            <tr>
+              <td align="center">
+                <table class="email-content" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                  <tr>
+                    <td class="email-masthead">
+                      <a href="#" class="f-fallback email-masthead_name">
+                      <img src="https://www.clipartmax.com/png/middle/114-1141697_clip-art-globe-sun-transparent-background.png" height="200px"/>
+                      </a>
+                    </td>
+                  </tr>
                   <!-- Email Body -->
                   <tr>
-                    <td class="email-body" width="570" cellpadding="0" cellspacing="0">
+                    <td class="email-body" width="100%" cellpadding="0" cellspacing="0">
                       <table class="email-body_inner" align="center" width="570" cellpadding="0" cellspacing="0" role="presentation">
                         <!-- Body content -->
                         <tr>
                           <td class="content-cell">
                             <div class="f-fallback">
-                              <h1>Hi ${newUser.username}</h1>
-                              <p>You recently requested to create your account. Use the button below to confirm your account. <strong>This verification link is only valid for the next 10 minutes.</strong></p>
+                              <h1>Hi, ${user.username}!</h1>
+                              <p>Thanks for signing up! We're excited to have you join us. Please verify your email address by clicking the button below:</p>
                               <!-- Action -->
                               <table class="body-action" align="center" width="100%" cellpadding="0" cellspacing="0" role="presentation">
                                 <tr>
                                   <td align="center">
-                                    <!-- Border based button
-                 https://litmus.com/blog/a-guide-to-bulletproof-buttons-in-email-design -->
+                                    <!-- Border based button -->
                                     <table width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation">
                                       <tr>
                                         <td align="center">
-                                          <a href=${verificationUrl} class="f-fallback button button--green" target="_blank">Confirm Account</a>
+                                          <a href="${verificationUrl}" class="f-fallback button button--blue" target="_blank">Verify Email</a>
                                         </td>
                                       </tr>
                                     </table>
                                   </td>
                                 </tr>
                               </table>
-                            
-                                
+                              <p>If you didn't create an account, no further action is required.</p>
+                              <p>Thanks, <br>The Team</p>
                               <!-- Sub copy -->
-                            
+                              <table class="body-sub" role="presentation">
+                                <tr>
+                                  <td>
+                                    <p class="f-fallback sub">If you’re having trouble clicking the "Verify Email" button, copy and paste the URL below into your web browser.</p>
+                                    <p class="f-fallback sub">${verificationUrl}</p>
+                                  </td>
+                                </tr>
+                              </table>
                             </div>
                           </td>
                         </tr>
@@ -547,10 +563,9 @@ const registerUser = async (req, res) => {
                       <table class="email-footer" align="center" width="570" cellpadding="0" cellspacing="0" role="presentation">
                         <tr>
                           <td class="content-cell" align="center">
+                            <p class="f-fallback sub align-center">&copy; 2024, Your Company. All rights reserved.</p>
                             <p class="f-fallback sub align-center">
-                              SM TOURS AND TRAVELS
-                              <br>Sultanpur , Tehsil Havelian District Abbottabad , kpk , Pakistan
-                              <br>+92 3126067717
+                              Your Company Inc.<br>1234 Street Rd.<br>Suite 1234
                             </p>
                           </td>
                         </tr>
@@ -562,14 +577,16 @@ const registerUser = async (req, res) => {
             </tr>
           </table>
         </body>
-      </html>` 
+      </html>`
     });
 
-    return res.status(201).json({ message: "User registered successfully. Please check your email to verify your account." });
+    res.status(200).json({ message: 'Verification email sent, please check your inbox.' });
   } catch (error) {
-    return res.status(500).json({ message: "Server error" });
+    console.error('Error in registration:', error);
+    res.status(500).json({ message: 'Server Error' });
   }
 };
+
 
 
 const loginUser = async (req, res) => {
