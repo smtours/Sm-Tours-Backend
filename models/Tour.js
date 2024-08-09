@@ -31,10 +31,7 @@ const tourSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    maxGroupSize: {
-      type: Number,
-      required: true,
-    },
+   
    
 
     reviews: [
