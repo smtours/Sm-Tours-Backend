@@ -38,7 +38,7 @@ const getSingleTour = async (req, res) => {
 
 const createTour = async (req, res) => {
   try {
-    const { title, city, desc,  photo, address, price, distance,featured } =
+    const { title, city, desc,  photo, address, price, distance,featured,maxGroupSize } =
       req.body;
 
     const newTour = new Tour({
@@ -50,6 +50,7 @@ const createTour = async (req, res) => {
       distance,
       price,
       featured,
+      maxGroupSize
     });
     await newTour.save();
 
@@ -65,12 +66,12 @@ const createTour = async (req, res) => {
 const updateTour = async (req, res) => {
   try {
     const tourId = req.params.id;
-    const { title, city, photo, desc,  address, price, distance,featured } =
+    const { title, city, photo, desc,  address, price, distance,featured,maxGroupSize } =
       req.body;
 
     const newTour = await Tour.findByIdAndUpdate(
       tourId,
-      { title, city, photo, desc,  address, distance, price ,featured},
+      { title, city, photo, desc,  address, distance, price ,featured,maxGroupSize},
       { new: true }
     );
 
