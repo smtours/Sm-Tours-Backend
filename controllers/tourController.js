@@ -50,7 +50,7 @@ const createTour = async (req, res) => {
       distance,
       price,
       featured,
-      maxGroupSize
+    
     });
     await newTour.save();
 
